@@ -2,13 +2,15 @@ package pages;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.*;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+import java.time.Duration;
 
 public class TextBoxPage {
     WebDriver driver;
     private static final Logger log = LogManager.getLogger(TextBoxPage.class);
-
 
     // Input fields
     By fullName = By.id("userName");
@@ -17,7 +19,7 @@ public class TextBoxPage {
     By permanentAddress = By.id("permanentAddress");
     By submitButton = By.id("submit");
 
-    // Output fields (more precise locators)
+    // Output fields
     By nameOutput = By.id("name");
     By emailOutput = By.id("email");
 
@@ -26,26 +28,40 @@ public class TextBoxPage {
     }
 
     public void fillTextBox(String name, String mail, String currAddr, String permAddr) {
-    	 log.info("Filling Full Name: " + name);
-         driver.findElement(fullName).clear();
-         driver.findElement(fullName).sendKeys(name);
+        try {
+            log.info("Filling Name: " + name);
+            driver.findElement(fullName).clear();
+            driver.findElement(fullName).sendKeys(name);
 
-         log.info("Filling Email: " + mail);
-         driver.findElement(email).clear();
-         driver.findElement(email).sendKeys(mail);
+            log.info("Filling Email: " + mail);
+            driver.findElement(email).clear();
+            driver.findElement(email).sendKeys(mail);
 
-         driver.findElement(currentAddress).clear();
-         driver.findElement(currentAddress).sendKeys(currAddr);
-         driver.findElement(permanentAddress).clear();
-         driver.findElement(permanentAddress).sendKeys(permAddr);
+            log.info("Filling Current Address: " + currAddr);
+            driver.findElement(currentAddress).clear();
+            driver.findElement(currentAddress).sendKeys(currAddr);
 
-         log.info("Clicking Submit button");
-         driver.findElement(submitButton).click();
+            log.info("Filling Permanent Address: " + permAddr);
+            driver.findElement(permanentAddress).clear();
+            driver.findElement(permanentAddress).sendKeys(permAddr);
+
+            // Wait for submit button & click using JS to avoid overlay issues
+            WebElement submitBtn = new WebDriverWait(driver, Duration.ofSeconds(10))
+                    .until(ExpectedConditions.elementToBeClickable(submitButton));
+            log.info("Clicking Submit button");
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", submitBtn);
+
+        } catch (ElementClickInterceptedException e) {
+            log.error("Submit button click intercepted! Possibly due to overlay/ad: " + e.getMessage());
+        } catch (TimeoutException e) {
+            log.error("Submit button not clickable after wait: " + e.getMessage());
+        } catch (Exception e) {
+            log.error("Exception while filling TextBox: " + e.getMessage());
+        }
     }
 
-    // Get individual outputs for precise validation
     public String getNameOutput() {
-        return driver.findElement(nameOutput).getText(); // "Name: SK Automation"
+        return driver.findElement(nameOutput).getText();
     }
 
     public String getEmailOutput() {
