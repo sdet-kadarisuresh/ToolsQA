@@ -59,12 +59,30 @@ public class TextBoxPage {
             log.error("Exception while filling TextBox: " + e.getMessage());
         }
     }
-
     public String getNameOutput() {
-        return driver.findElement(nameOutput).getText();
+        try {
+            WebElement nameEl = new WebDriverWait(driver, Duration.ofSeconds(5))
+                    .until(ExpectedConditions.visibilityOfElementLocated(nameOutput));
+            return nameEl.getText();
+        } catch (TimeoutException e) {
+            log.warn("Name output not found! Possibly empty input.");
+            return "";
+        }
     }
+
+
+   
 
     public String getEmailOutput() {
-        return driver.findElement(emailOutput).getText();
-    }
+    	  try {
+              WebElement nameEl = new WebDriverWait(driver, Duration.ofSeconds(5))
+                      .until(ExpectedConditions.visibilityOfElementLocated(emailOutput));
+              return nameEl.getText();
+          } catch (TimeoutException e) {
+              log.warn("Name output not found! Possibly empty input.");
+              return "";
+          }
+      }
 }
+    	
+    
